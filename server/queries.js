@@ -2,10 +2,11 @@ const { response } = require("express");
 const Binance = require("node-binance-api");
 const {getAllCandles} = require('./customBinance.js')
 const {coinToDb, tableGenerator, pool, isDateInDb} = require('./dbQueries')
+const {PUBLIC_KEY, PRIVATE_KEY} = require("./keys.js")
 
 const binance = new Binance().options({
-  APIKEY: "lH0sHdc09QIabXjTmQi5XWsskWLb1bKshUABOu5Nmh3maX15YxNOg1vXVloRRYGu",
-  APISECRET: "Hm4SWeT8824oV9GfiaZbYnSNRLyhYT21YkkK5CfTDktsltms0YLCRSUIiXjBrJ43",
+  APIKEY: PUBLIC_KEY,
+  APISECRET: PRIVATE_KEY,
   recvWindow: 60000,
   verbose: true
 });
