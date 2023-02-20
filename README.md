@@ -9,4 +9,5 @@
 
 - 'pacman -S node' - install node.js to run the server
 - 'npm install' - install node.js packages and dependencies
+- please create a file called keys.js in the root directory with the variables PUBLIC_KEY, PRIVATE_KEY, POSTGRES_USER, DATABASE_NAME, DATABASE_PASSWD
 - 'node index.js' - run node.js server
