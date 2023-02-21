@@ -25,8 +25,6 @@ module.exports = {
     DATABASE_NAME,
     DATABASE_PASSWD
 };
-
-
-
+```
 
 - 'node index.js' - run node.js server
