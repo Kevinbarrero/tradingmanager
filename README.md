@@ -9,13 +9,13 @@
 
 - 'pacman -S node' - install node.js to run the server
 - 'npm install' - install node.js packages and dependencies
-- please create a file called keys.js in the root directory with the variables PUBLIC_KEY, PRIVATE_KEY, POSTGRES_USER, DATABASE_NAME, DATABASE_PASSWD like that
+- please create a file called keys.js inside the /server directory with the variables PUBLIC_KEY, PRIVATE_KEY, POSTGRES_USER, DATABASE_NAME, DATABASE_PASSWD like that
 ```javascript
 const PUBLIC_KEY = "xxxxxxx" // Binance Public Api Key
 const PRIVATE_KEY = "xxxxxx" // Binance Private Api Key
 const POSTGRES_USER = "xxxx" //Postgres User
 const DATABASE_NAME = "xxxx" //Postgres Database Name
-const DATABASE_PASSWD = "postgres" // Postgres Password
+const DATABASE_PASSWD = "xx" // Postgres Password
 
 //Export The Modules
 module.exports = {
