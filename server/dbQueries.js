@@ -69,10 +69,11 @@ function tableGenerator(key) {
   pool.query(query);
 }
 
-
 async function isDateInDb(coin, startTime) {
   const query = {
-    text: `SELECT EXISTS(SELECT 1 FROM ${coin} WHERE open_time = to_timestamp(${startTime/1000}));`
+    text: `SELECT EXISTS(SELECT 1 FROM ${coin} WHERE open_time = to_timestamp(${
+      startTime / 1000
+    }));`,
   };
 
   try {
@@ -85,18 +86,20 @@ async function isDateInDb(coin, startTime) {
 }
 
 async function findRowsGreaterThanTimestamp(coin, startTime) {
-    const query = {
-      text: `SELECT * FROM ${coin} WHERE open_time > to_timestamp(${startTime/1000}) AT TIME ZONE 'Europe/Moscow'`
-    };
+  const query = {
+    text: `SELECT * FROM ${coin} WHERE open_time > to_timestamp(${
+      startTime / 1000
+    }) AT TIME ZONE 'Europe/Moscow'`,
+  };
 
-    const result = await pool.query(query);
+  const result = await pool.query(query);
 
-    return result.rows;
+  return result.rows;
 }
 
-function deleteOldRecords(){
-  const query = `SELECT delete_old_records();`
-  pool.query(query)
+function deleteOldRecords() {
+  const query = `SELECT delete_old_records();`;
+  pool.query(query);
 }
 module.exports = {
   coinToDb,
