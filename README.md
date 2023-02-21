@@ -12,8 +12,8 @@ Reporting and analytics: The platform could provide users with detailed reportin
 
 ## Initialize Project
 
-- 'pacman -S node' - install node.js to run the server
-- 'npm install' - install node.js packages and dependencies
+- `pacman -S node` - install node.js to run the server
+- `npm install` - install node.js packages and dependencies
 - please create a file called keys.js inside the /server directory with the variables PUBLIC_KEY, PRIVATE_KEY, POSTGRES_USER, DATABASE_NAME, DATABASE_PASSWD like that
 ```javascript
 const PUBLIC_KEY = "xxxxxxx" // Binance Public Api Key
@@ -31,5 +31,9 @@ module.exports = {
     DATABASE_PASSWD
 };
 ```
-
-- 'node index.js' - run node.js server
+- `node index.js` - run node.js server
+- send the request `curl -X GET "localhost:3000/createtables"`to the node server to generate the tables in the database, the response have to be `Tables Created Correctly`
+- You can get the data from the database and the server with the request `/klines/:coin/:interval/:startTime`, where :coin is the pair to extract for example: (btcusdt, bnbusdt, adausdt, ...), :interval is the separation time of the candles, can be (1m, 5m, 15m, 30m, 1h, 2h, 4h, 1d, ...), :startTime is the start time of the query, it have to be a unix time, for example: (1676977380000), please add miliseconds, you can use https://www.unixtimestamp.com/ to convert the times, this request can take to long in the first time if you try with a old time, after that, all the data automatically I'll be saved in the database and is going to be fast. There is an example how to use it `curl -X GET "localhost:3000/klines/BTCUSDT/1m/1676991240000"`, the response from the server is going to be like that 
+```javascript
+[{"open_time":"2023-02-21T14:55:00.000Z","open":24703.1,"high":24727.4,"low":24695.1,"close":24707.1,"volume":346.937,"close_time":"2023-02-21T14:55:59.999Z","n_trades":2527}]
+```
