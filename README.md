@@ -26,4 +26,7 @@ module.exports = {
     DATABASE_PASSWD
 };
 
+
+
+
 - 'node index.js' - run node.js server
