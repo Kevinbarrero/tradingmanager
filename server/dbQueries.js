@@ -9,7 +9,7 @@ const pool = new Pool({
   port: 5432,
 });
 
-function coinToDb(
+async function coinToDb(
   coin,
   open_time,
   open,
@@ -47,7 +47,7 @@ function coinToDb(
     n_trades +
     `) ON CONFLICT (open_time) DO NOTHING;
     `;
-  pool.query(query);
+  await pool.query(query);
 }
 
 function tableGenerator(key) {
@@ -67,6 +67,11 @@ function tableGenerator(key) {
       n_trades INT
       )`;
   pool.query(query);
+}
+
+function getLastRow(coin){
+  const query = `SELECT * FROM ${coin} ORDER BY open_time desc LIMIT 1`
+  return pool.query(query);
 }
 
 async function isDateInDb(coin, startTime) {
@@ -89,12 +94,11 @@ async function findRowsGreaterThanTimestamp(coin, startTime) {
   const query = {
     text: `SELECT * FROM ${coin} WHERE open_time > to_timestamp(${
       startTime / 1000
-    }) AT TIME ZONE 'Europe/Moscow'`,
+    })`,
   };
 
   const result = await pool.query(query);
-
-  return result.rows;
+  return result.rows.sort((a,b) => a.open_time - b.open_time);
 }
 
 function deleteOldRecords() {
@@ -107,5 +111,6 @@ module.exports = {
   isDateInDb,
   deleteOldRecords,
   findRowsGreaterThanTimestamp,
+  getLastRow,
   pool,
 };

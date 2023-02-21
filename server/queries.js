@@ -8,6 +8,7 @@ const {
   isDateInDb,
   deleteOldRecords,
   findRowsGreaterThanTimestamp,
+  getLastRow,
 } = require("./dbQueries");
 const { PUBLIC_KEY, PRIVATE_KEY } = require("./keys.js");
 
@@ -34,33 +35,31 @@ const getKlines = async (request, response) => {
   const coin = request.params.coin;
   const interval = request.params.interval;
   const startTime = request.params.startTime;
-  let klines = {};
-  let last = {};
+  let klines = null;
+  let last = null;
   console.log(request.params);
   if (await isDateInDb(coin, startTime)) {
-    klines = await findRowsGreaterThanTimestamp(coin, startTime);
-    last = klines[Object.keys(klines)[Object.keys(klines).length - 1]];
-    console.log(Math.floor(new Date(last.open_time).getTime()));
+    last = await getLastRow(coin);
+    console.log(last.rows[0].open_time);
   }
   klinesBinance = await getAllCandles(
     coin,
     interval,
-    Math.floor(new Date(last.open_time).getTime())
+    Math.floor(new Date(last.rows[0].open_time).getTime())
   );
   for (const [key, value] of Object.entries(klinesBinance)) {
-    klines.open_time = new Date(value[0]).toLocaleString({
-      timeZone: "Europe/Moscow",
-    });
+    /*
+    klines.open_time = new Date(value[0])
     klines.open = value[1];
     klines.high = value[2];
     klines.low = value[3];
     klines.close = value[4];
     klines.volume = value[5];
-    klines.close_time = new Date(value[6]).toLocaleString({
-      timeZone: "Europe/Moscow",
-    });
+    klines.close_time = new Date(value[6])
     klines.n_trades = value[8];
-    coinToDb(
+    console.log(klines.length)
+    */
+    await coinToDb(
       coin.toLowerCase(),
       value[0] / 1000,
       value[1],
@@ -72,7 +71,7 @@ const getKlines = async (request, response) => {
       value[8]
     );
   }
-  response.status(201).send(klines.sort((a, b) => a.open_time - b.open_time));
+  response.status(201).send(await findRowsGreaterThanTimestamp(coin, startTime));
   deleteOldRecords();
 };
 
@@ -81,7 +80,7 @@ const createTables = async (request, response) => {
   for (const [key] of Object.entries(coindata)) {
     tableGenerator(key.toLowerCase());
   }
-  response.status(201).send("Coins Updated Correctly");
+  response.status(201).send("Tables Created Correctly");
 };
 
 module.exports = {
