@@ -10,6 +10,7 @@ const {
   findRowsGreaterThanTimestamp,
   getLastRow,
 } = require("./dbQueries");
+
 const { PUBLIC_KEY, PRIVATE_KEY } = require("./keys.js");
 
 const binance = new Binance().options({
@@ -35,30 +36,24 @@ const getKlines = async (request, response) => {
   const coin = request.params.coin;
   const interval = request.params.interval;
   const startTime = request.params.startTime;
-  let klines = null;
   let last = null;
+  let klines = null;
   console.log(request.params);
-  if (await isDateInDb(coin, startTime)) {
+
+  if ((await isDateInDb(coin, startTime)) === true) {
     last = await getLastRow(coin);
-    console.log(last.rows[0].open_time);
+    console.log("Data in db");
+    klines = await getAllCandles(
+      coin,
+      interval,
+      Math.floor(new Date(last.rows[0].open_time).getTime())
+    );
+  } else {
+    console.log("Data Not in DB");
+    klines = await getAllCandles(coin, interval, startTime);
   }
-  klinesBinance = await getAllCandles(
-    coin,
-    interval,
-    Math.floor(new Date(last.rows[0].open_time).getTime())
-  );
-  for (const [key, value] of Object.entries(klinesBinance)) {
-    /*
-    klines.open_time = new Date(value[0])
-    klines.open = value[1];
-    klines.high = value[2];
-    klines.low = value[3];
-    klines.close = value[4];
-    klines.volume = value[5];
-    klines.close_time = new Date(value[6])
-    klines.n_trades = value[8];
-    console.log(klines.length)
-    */
+
+  for (const [key, value] of Object.entries(klines)) {
     await coinToDb(
       coin.toLowerCase(),
       value[0] / 1000,
@@ -71,7 +66,9 @@ const getKlines = async (request, response) => {
       value[8]
     );
   }
-  response.status(201).send(await findRowsGreaterThanTimestamp(coin, startTime));
+  response
+    .status(201)
+    .send(await findRowsGreaterThanTimestamp(coin, startTime));
   deleteOldRecords();
 };
 
