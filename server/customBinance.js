@@ -21,8 +21,8 @@ async function getAllCandles(symbol, interval, startTime, endTime) {
     });
 
     // Add the candles to the list
+    
     candles = candles.concat(response.data);
-
     // Get the timestamp of the last candle retrieved
     const lastCandleTimestamp = response.data[response.data.length - 1][0];
 
