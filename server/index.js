@@ -1,25 +1,13 @@
-const express = require('express')
-const bodyParser = require('body-parser')
-const app = express()
-const port = 3000
-const db = require('./queries')
 const console = require('console');
+const http = require("http");
+const app = require("./app");
+const server = http.createServer(app);
 
-app.use(bodyParser.json())
-app.use(
-  bodyParser.urlencoded({
-    extended: true,
-  })
-)
 
-app.get('/', (request, response) => {
-  response.json({ info: 'Node.js, Express, and Postgres API' })
-})
+const { API_PORT } = process.env;
+const port = process.env.PORT || API_PORT;
 
-app.get('/coindata/:coin', db.getCoin)
-app.get('/createtables', db.createTables)
-app.get('/klines/:coin/:interval/:startTime', db.getKlines)
-app.listen(port, () => {
-  //binance.futuresChart( 'BTCUSDT', '1m', console.log );
-  console.log(`App running on port ${port}.`)
-})
+// server listening 
+server.listen(port, () => {
+  console.log(`Server running on port ${port}`);
+});
