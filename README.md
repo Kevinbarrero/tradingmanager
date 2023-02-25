@@ -12,8 +12,9 @@ Reporting and analytics: The platform could provide users with detailed reportin
 
 ## Initialize Project
 
-- `pacman -S node` - install node.js to run the server
+- install node.js to run the server
 - `npm install` - install node.js packages and dependencies
+- `docker-compose up -d` - create the database docker volumes and run it.
 - please create a file called keys.js inside the /server directory with the variables PUBLIC_KEY, PRIVATE_KEY, POSTGRES_USER, DATABASE_NAME, DATABASE_PASSWD like that
 ```javascript
 const PUBLIC_KEY = "xxxxxxx" // Binance Public Api Key
