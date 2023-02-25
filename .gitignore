@@ -145,3 +145,5 @@ dist
 
 server/keys.js
 server/node_modules/
+server/postgres-data/
+server/init-mongo.js/
