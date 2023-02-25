@@ -1,0 +1,29 @@
+version: "3"
+
+services:
+  mongodb:
+    image: mongo
+    container_name: tmanagermongo
+    restart: always
+    volumes:
+      - ./init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js:ro
+      - ./mongo-volume:/data/db\
+    environment:
+      - MONGO_INITDB_DATABASE=tradingmanager
+      - MONGO_INITDB_ROOT_USERNAME=holdandup
+      - MONGO_INITDB_ROOT_PASSWORD=4200
+    ports:
+      - "27017-27019:27017-27019"
+
+  postgres:
+    image: postgres
+    container_name: tmanagerpostgres
+    restart: always
+    volumes:
+      - ./postgres-data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: tradingmanager
+      POSTGRES_USER: tradingmanager
+      POSTGRES_PASSWORD: tradingmanager
+    ports:
+      - 5432:5432
