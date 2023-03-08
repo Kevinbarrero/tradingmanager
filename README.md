@@ -1,5 +1,6 @@
 # ALPHATRADE
 
+
 Could be a comprehensive platform for traders and investors to develop, test, and execute their trading strategies using sophisticated tools and analytics. Here are some key features and components that could be included in such a project:
 
 Backtesting: Users could test their trading strategies using historical market data to see how their strategies would have performed in the past. The platform could provide sophisticated backtesting tools, such as Monte Carlo simulations, to help users evaluate their strategies' performance in different market conditions.
