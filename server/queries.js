@@ -11,7 +11,8 @@ const {
   getLastRow,
 } = require("./dbQueries");
 
-const { PUBLIC_KEY, PRIVATE_KEY } = require("./keys.js");
+const { PUBLIC_KEY } = process.env.PUBLIC_KEY
+const { PRIVATE_KEY } = process.env.PRIVATE_KEY
 
 const binance = new Binance().options({
   APIKEY: PUBLIC_KEY,

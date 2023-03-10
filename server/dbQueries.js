@@ -1,5 +1,7 @@
 const Pool = require("pg").Pool;
-const { POSTGRES_USER, DATABASE_NAME, DATABASE_PASSWD } = require("./keys.js");
+const POSTGRES_USER = process.env.POSTGRES_USER
+const DATABASE_NAME = process.env.DATABASE_NAME
+const DATABASE_PASSWD = process.env.DATABASE_PASSWD
 
 const pool = new Pool({
   user: POSTGRES_USER,
