@@ -42,7 +42,6 @@ DECLARE
   table_name text;
 BEGIN
 <<<<<<< HEAD
-  -- Lista de tablas a las que deseas aplicar la eliminación de registros antiguos
 =======
 >>>>>>> feature/ReadMeChanges
   FOR table_name IN 
