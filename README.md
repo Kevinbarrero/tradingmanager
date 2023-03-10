@@ -23,8 +23,8 @@ API_PORT=3000
 MONGO_URI= mongodb://holdandup:4200@localhost:27017
 TOKEN_KEY = secret
 
-PUBLIC_KEY = "lH0sHdc09QIabXjTmQi5XWsskWLb1bKshUABOu5Nmh3maX15YxNOg1vXVloRRYGu"
-PRIVATE_KEY = "Hm4SWeT8824oV9GfiaZbYnSNRLyhYT21YkkK5CfTDktsltms0YLCRSUIiXjBrJ43"
+PUBLIC_KEY = "xxxxx"
+PRIVATE_KEY = "xxxx"
 POSTGRES_USER = "tradingmanager"
 DATABASE_NAME = "tradingmanager"
 DATABASE_PASSWD = "tradingmanager"
