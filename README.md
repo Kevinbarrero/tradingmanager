@@ -41,9 +41,6 @@ $$
 DECLARE
   table_name text;
 BEGIN
-<<<<<<< HEAD
-=======
->>>>>>> feature/ReadMeChanges
   FOR table_name IN 
     SELECT quote_ident(tablename)
     FROM pg_catalog.pg_tables
