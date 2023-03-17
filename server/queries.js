@@ -1,18 +1,14 @@
 const { response } = require("express");
 const Binance = require("node-binance-api");
-const { getAllCandles } = require("./customBinance.js");
+const { getAllCandles, klines1m } = require("./customBinance.js");
 const {
-  coinToDb,
   tableGenerator,
   pool,
-  isDateInDb,
-  deleteOldRecords,
   findRowsGreaterThanTimestamp,
-  getLastRow,
 } = require("./dbQueries");
 
-const { PUBLIC_KEY } = process.env.PUBLIC_KEY
-const { PRIVATE_KEY } = process.env.PRIVATE_KEY
+const { PUBLIC_KEY } = process.env.PUBLIC_KEY;
+const { PRIVATE_KEY } = process.env.PRIVATE_KEY;
 
 const binance = new Binance().options({
   APIKEY: PUBLIC_KEY,
@@ -32,45 +28,21 @@ const getCoin = (request, response) => {
   });
 };
 
-//query to get klines from binance
 const getKlines = async (request, response) => {
   const coin = request.params.coin;
   const interval = request.params.interval;
   const startTime = request.params.startTime;
-  let last = null;
-  let klines = null;
   console.log(request.params);
 
-  if ((await isDateInDb(coin, startTime)) === true) {
-    last = await getLastRow(coin);
-    console.log("Data in db");
-    klines = await getAllCandles(
-      coin,
-      interval,
-      Math.floor(new Date(last.rows[0].open_time).getTime())
-    );
+  if (interval === "1m") {
+    klines1m(coin, startTime);
+    response
+      .status(201)
+      .send(await findRowsGreaterThanTimestamp(coin, startTime));
   } else {
-    console.log("Data Not in DB");
     klines = await getAllCandles(coin, interval, startTime);
+    response.status(201).send(klines);
   }
-
-  for (const [key, value] of Object.entries(klines)) {
-    await coinToDb(
-      coin.toLowerCase(),
-      value[0] / 1000,
-      value[1],
-      value[2],
-      value[3],
-      value[4],
-      value[5],
-      value[6] / 1000,
-      value[8]
-    );
-  }
-  response
-    .status(201)
-    .send(await findRowsGreaterThanTimestamp(coin, startTime));
-  deleteOldRecords();
 };
 
 const createTables = async (request, response) => {

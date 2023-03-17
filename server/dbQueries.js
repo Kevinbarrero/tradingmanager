@@ -50,6 +50,7 @@ async function coinToDb(
     `) ON CONFLICT (open_time) DO NOTHING;
     `;
   await pool.query(query);
+  deleteOldRecords();
 }
 
 function tableGenerator(key) {

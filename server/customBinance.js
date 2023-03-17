@@ -1,4 +1,9 @@
-const axios = require('axios');
+const axios = require("axios");
+const {
+  isDateInDb,
+  getLastRow,
+  coinToDb,
+} = require("./dbQueries");
 
 async function getAllCandles(symbol, interval, startTime, endTime) {
   const baseUrl = "https://fapi.binance.com";
@@ -19,20 +24,44 @@ async function getAllCandles(symbol, interval, startTime, endTime) {
         limit: limit,
       },
     });
-
-    // Add the candles to the list
-    
     candles = candles.concat(response.data);
-    // Get the timestamp of the last candle retrieved
     const lastCandleTimestamp = response.data[response.data.length - 1][0];
-
-    // Set the start time for the next request to the timestamp of the last candle + 1
     startTimeTemp = lastCandleTimestamp + 1;
   } while (response.data.length === limit);
 
   return candles;
 }
 
+async function klines1m(coin, startTime) {
+  if ((await isDateInDb(coin, startTime)) === true) {
+    last = await getLastRow(coin);
+    console.log("Data in db");
+    klines = await getAllCandles(
+      coin,
+      "1m",
+      Math.floor(new Date(last.rows[0].open_time).getTime())
+    );
+  } else {
+    console.log("Data Not in DB");
+    klines = await getAllCandles(coin, "1m", startTime);
+  }
+
+  for (const [key, value] of Object.entries(klines)) {
+    await coinToDb(
+      coin.toLowerCase(),
+      value[0] / 1000,
+      value[1],
+      value[2],
+      value[3],
+      value[4],
+      value[5],
+      value[6] / 1000,
+      value[8]
+    );
+  }
+}
+
 module.exports = {
   getAllCandles,
+  klines1m,
 };
