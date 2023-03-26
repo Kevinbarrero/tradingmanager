@@ -29,20 +29,25 @@ const getCoin = (request, response) => {
 };
 
 const getKlines = async (request, response) => {
-  const coin = request.params.coin;
-  const interval = request.params.interval;
-  const startTime = request.params.startTime;
-  console.log(request.params);
-
-  if (interval === "1m") {
-    klines1m(coin, startTime);
-    response
-      .status(201)
-      .send(await findRowsGreaterThanTimestamp(coin, startTime));
-  } else {
-    klines = await getAllCandles(coin, interval, startTime);
-    response.status(201).send(klines);
+  try {
+    const coin = request.params.coin;
+    const interval = request.params.interval;
+    const startTime = request.params.startTime;
+    console.log(request.params);
+  
+    if (interval === "1m") {
+      klines1m(coin, startTime);
+      response
+        .status(201)
+        .send(await findRowsGreaterThanTimestamp(coin, startTime));
+    } else {
+      klines = await getAllCandles(coin, interval, startTime);
+      response.status(201).send(klines);
+    }
+  } catch (error) {
+    response.status(500).send("Internal server error: coin, interval or datatime not correct");
   }
+ 
 };
 
 const createTables = async (request, response) => {
@@ -53,8 +58,14 @@ const createTables = async (request, response) => {
   response.status(201).send("Tables Created Correctly");
 };
 
+const getCoins = async(request, response) => {
+  let coindata = await binance.futuresPrices();
+  response.status(201).send(Object.keys(coindata))
+}
+
 module.exports = {
   getCoin,
   createTables,
   getKlines,
+  getCoins
 };
