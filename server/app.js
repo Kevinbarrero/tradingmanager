@@ -7,9 +7,16 @@ const auth = require("./middleware/auth");
 const bodyParser = require("body-parser");
 const db = require("./queries");
 const app = express();
-
 app.use(express.json());
-
+app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Methods", "GET, PUT, POST, DELETE, OPTIONS");
+  res.header(
+    "Access-Control-Allow-Headers",
+    "Origin, X-Requested-With, Content-Type, Accept"
+  );
+  next();
+});
 app.use(bodyParser.json());
 app.use(
   bodyParser.urlencoded({
@@ -21,9 +28,9 @@ const User = require("./model/user");
 
 app.post("/register", async (req, res) => {
   try {
-    const { first_name, last_name, email, password } = req.body;
+    const { firstname, lastname, email, password } = req.body;
 
-    if (!(email && password && first_name && last_name)) {
+    if (!(email && password && firstname && lastname)) {
       res.status(400).send("All input is required");
     }
 
@@ -36,8 +43,8 @@ app.post("/register", async (req, res) => {
     encryptedPassword = await bcrypt.hash(password, 10);
 
     const user = await User.create({
-      first_name,
-      last_name,
+      firstname,
+      lastname,
       email: email.toLowerCase(),
       password: encryptedPassword,
     });
@@ -48,7 +55,6 @@ app.post("/register", async (req, res) => {
         expiresIn: "2h",
       }
     );
-    console.log(token);
     user.token = token;
     res.status(201).json(user);
   } catch (err) {
@@ -93,6 +99,7 @@ app.get('/', (request, response) => {
 })
 */
 app.get("/coindata/:coin", db.getCoin);
+app.get("/coins", db.getCoins)
 app.get("/createtables", db.createTables);
 app.get("/klines/:coin/:interval/:startTime", db.getKlines);
 
