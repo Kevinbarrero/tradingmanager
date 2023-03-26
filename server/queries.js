@@ -36,10 +36,11 @@ const getKlines = async (request, response) => {
     console.log(request.params);
   
     if (interval === "1m") {
+      res = await getAllCandles(coin, interval, startTime)
       klines1m(coin, startTime);
       response
         .status(201)
-        .send(await findRowsGreaterThanTimestamp(coin, startTime));
+        .send(res);
     } else {
       klines = await getAllCandles(coin, interval, startTime);
       response.status(201).send(klines);

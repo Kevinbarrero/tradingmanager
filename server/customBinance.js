@@ -49,9 +49,10 @@ async function getAllCandles(symbol, interval, startTime) {
 }
 
 async function klines1m(coin, startTime) {
-  try {
     if ((await isDateInDb(coin, startTime)) === true) {
+      
       last = await getLastRow(coin);
+      
       console.log("Data in db");
       klines = await getAllCandles(
         coin,
@@ -75,9 +76,6 @@ async function klines1m(coin, startTime) {
         value.n_trades
       );
     })
-  } catch (error) {
-    console.log(error)
-  }
   
 }
 
