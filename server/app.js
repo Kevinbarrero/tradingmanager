@@ -1,6 +1,8 @@
 require("dotenv").config();
 require("./config/database").connect();
 const express = require("express");
+const swaggerUi = require('swagger-ui-express');
+const swaggerDocument = require('./swagger.json');
 let bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const auth = require("./middleware/auth");
@@ -8,6 +10,7 @@ const bodyParser = require("body-parser");
 const db = require("./queries");
 const app = express();
 app.use(express.json());
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 app.use((req, res, next) => {
   res.header("Access-Control-Allow-Origin", "*");
   res.header("Access-Control-Allow-Methods", "GET, PUT, POST, DELETE, OPTIONS");
@@ -89,16 +92,11 @@ app.post("/login", async (req, res) => {
   }
 });
 
-app.post("/welcome", auth, (req, res) => {
-  res.status(200).send("Welcome 🙌 ");
-});
-
 /*
 app.get('/', (request, response) => {
   response.json({ info: 'Node.js, Express, and Postgres API' })
 })
 */
-app.get("/coindata/:coin", db.getCoin);
 app.get("/coins", db.getCoins)
 app.get("/createtables", db.createTables);
 app.get("/klines/:coin/:interval/:startTime", db.getKlines);
