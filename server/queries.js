@@ -1,11 +1,7 @@
 const { response } = require("express");
 const Binance = require("node-binance-api");
 const { getAllCandles, klines1m } = require("./customBinance.js");
-const {
-  tableGenerator,
-  pool,
-  findRowsGreaterThanTimestamp,
-} = require("./dbQueries");
+const {tableGenerator} = require("./dbQueries");
 
 const { PUBLIC_KEY } = process.env.PUBLIC_KEY;
 const { PRIVATE_KEY } = process.env.PRIVATE_KEY;
@@ -16,17 +12,6 @@ const binance = new Binance().options({
   recvWindow: 60000,
   verbose: true,
 });
-
-const getCoin = (request, response) => {
-  console.log(request.params.coin.toUpperCase());
-  query = `SELECT * FROM ` + '"' + request.params.coin.toUpperCase() + '"';
-  pool.query(query, (error, results) => {
-    if (error) {
-      throw error;
-    }
-    response.status(200).json(results.rows);
-  });
-};
 
 const getKlines = async (request, response) => {
   try {
@@ -65,7 +50,6 @@ const getCoins = async(request, response) => {
 }
 
 module.exports = {
-  getCoin,
   createTables,
   getKlines,
   getCoins

@@ -1,0 +1,257 @@
+{
+    "swagger": "2.0",
+    "info": {
+      "version": "1.0.0",
+      "title": "Alpha Trading APi Docs",
+      "description": "Test Backend Api"
+    },
+    "basePath": "/",
+    "schemes": [
+      "http"
+    ],
+    "paths": {
+        "/register": {
+            "post": {
+              "tags": ["User Endpoints"],
+              "summary": "Registers a new user",
+              "description": "Registers a new user with the given information",
+              "parameters": [
+                {
+                  "name": "body",
+                  "in": "body",
+                  "description": "User information",
+                  "required": true,
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "firstname": {
+                        "type": "string"
+                      },
+                      "lastname": {
+                        "type": "string"
+                      },
+                      "email": {
+                        "type": "string",
+                        "format": "email"
+                      },
+                      "password": {
+                        "type": "string",
+                        "format": "password"
+                      }
+                    },
+                    "required": ["firstname", "lastname", "email", "password"]
+                  }
+                }
+              ],
+              "responses": {
+                "201": {
+                  "description": "User registered successfully",
+                  "schema": {
+                    "$ref": "#/definitions/User"
+                  },
+                  "examples": {
+                    "application/json": {
+                      "firstname": "test1",
+                      "lastname": "test1",
+                      "email": "test1@gmail.com",
+                      "password": "passsd123"
+                    }
+                  }
+                },
+                "400": {
+                  "description": "Invalid input provided"
+                },
+                "409": {
+                  "description": "User already exists"
+                },
+                "500": {
+                  "description": "Server error"
+                }
+              }
+            }
+          },
+          "/login": {
+            "post": {
+              "tags": ["User Endpoints"],
+              "summary": "Authenticate user",
+              "description": "Authenticate user and return a JWT token",
+              "parameters": [
+                {
+                  "name": "User credentials",
+                  "in": "body",
+                  "description": "User credentials to authenticate",
+                  "required": true,
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "email": {
+                        "type": "string",
+                        "example": "user@example.com"
+                      },
+                      "password": {
+                        "type": "string",
+                        "example": "password123"
+                      }
+                    }
+                  }
+                }
+              ],
+              "responses": {
+                "200": {
+                  "description": "User authenticated successfully",
+                  "schema": {
+                    "$ref": "#/definitions/User"
+                  },
+                  "examples": {
+                    "application/json": {
+                      "firstname": "test1",
+                      "lastname": "test1",
+                      "email": "test1@gmail.com",
+                      "password": "passsd123",
+                      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNWUzZjJmYzY4YjY3NzAwMDI2MDZjNmRkIiwidXNlcm5hbWUiOiJ0ZXN0MSIsImlhdCI6MTYxODA5MDM2NiwiZXhwIjoxNjE4MDkzOTY2fQ.hvOSzAcufAk6GpLSl9-TbYG34vMAiWlOhkmjSKLwMgI"
+                    }
+                  }
+                },
+                "400": {
+                  "description": "Invalid credentials"
+                }
+              }
+            }
+          },
+          "/coins": {
+            "get": {
+              "tags":["Market Endpoints"],
+              "summary": "Coin's Array",
+              "description": "Returns all the coins in the server",
+              "produces": [
+                "application/json"
+              ],
+              "responses": {
+                "200": {
+                  "description": "Successful operation",
+                  "schema": {
+                    "type": "array",
+                    "example": [
+                        "ETHUSDT",
+                        "SOLUSDT",
+                        "ADABUSD",
+                        "GRTUSDT",
+                        "KNCUSDT",
+                        "NEARBUSD",
+                        "BTCUSDT",
+                        "LDOUSDT",
+                        "GMTBUSD",
+                        "LINKUSDT"]
+                  }
+                }
+              }
+            }
+          },
+        "/klines/{coin}/{interval}/{startTime}": {
+                "get": {
+                  "tags": ["Market Endpoints"],
+                  "summary": "Get klines data for a specific coin",
+                  "description": "Returns klines data for a specific coin, specified by the coin symbol, interval, and start time.",
+                  "produces": [
+                    "application/json"
+                  ],
+                  "parameters": [
+                    {
+                      "name": "coin",
+                      "in": "path",
+                      "description": "Symbol of the coin (e.g. ETHUSDT)",
+                      "required": true,
+                      "type": "string",
+                      "example": "ETHUSDT"
+                    },
+                    {
+                      "name": "interval",
+                      "in": "path",
+                      "description": "Interval of the klines data (e.g. 1m, 1h, 1d)",
+                      "required": true,
+                      "type": "string",
+                      "example": "1m"
+                    },
+                    {
+                      "name": "startTime",
+                      "in": "path",
+                      "description": "query start date, use unix timestamp date, you can convert dates from human readable format to unix here https://www.unixtimestamp.com/  (I recommend adding 3 extra zeros, since the api counts the milliseconds)",
+                      "required": true,
+                      "type": "integer",
+                      "example": 1679837708000
+                    }
+                  ],
+                  "responses": {
+                    "200": {
+                      "description": "Klines data returned successfully",
+                      "schema": {
+                        "type": "object",
+                        "example": [
+                            {
+                              "open_time": 1679924160000,
+                              "open": "27783.10",
+                              "high": "27786.00",
+                              "low": "27695.90",
+                              "close": "27704.10",
+                              "volume": "1127.497",
+                              "close_time": 1679924219999,
+                              "n_trades": 8118
+                            }
+                        ]
+                      }
+                    },
+                    "400": {
+                      "description": "Invalid input"
+                    },
+                    "404": {
+                      "description": "Klines data not found"
+                    },
+                    "500": {
+                      "description": "Internal server error"
+                    }
+                  }
+                }
+            }
+        },
+        "definitions": {
+          "User": {
+            "type": "object",
+            "properties": {
+              "_id": {
+                "type": "string",
+                "example": "6095f6cb523ec128a1f6d50d"
+              },
+              "firstname": {
+                "type": "string",
+                "example": "test1"
+              },
+              "lastname": {
+                "type": "string",
+                "example": "test1"
+              },
+              "email": {
+                "type": "string",
+                "format": "email",
+                "example": "test1@gmail.com"
+              },
+              "password": {
+                "type": "string",
+                "format": "password",
+                "example": "passsd123"
+              },
+              "token": {
+                "type": "string",
+                "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+              }
+            }
+          }
+        },
+        "tags": [
+            {
+              "name": "User Endpoints"
+            },
+            {
+              "name": "Market Endpoints"
+            }
+          ]
+      }
