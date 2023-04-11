@@ -152,13 +152,22 @@ app.post("/deleteStrategy", async (req, res) => {
           },
         },
         { new: true }
-      )
+      ).then(user => {
+      }).catch(err => {
+        console.log(err)
+      })
       res.status(200).send("Strategy Deleted")
     }
   } catch (err) {
+    console.log(err)
     res.status(500).send("Server error");
   }
 });
+/*
+app.get('/', (request, response) => {
+  response.json({ info: 'Node.js, Express, and Postgres API' })
+})
+*/
 app.get("/coins", db.getCoins);
 app.get("/createtables", db.createTables);
 app.get("/klines/:coin/:interval/:startTime", db.getKlines);
