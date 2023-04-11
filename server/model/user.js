@@ -6,6 +6,16 @@ const userSchema = new mongoose.Schema({
   email: { type: String, unique: true },
   password: { type: String },
   token: { type: String },
+  strategies: [{
+    name: { type: String, unique: true },
+    indicators: [{
+      id: { type: String },
+      value: { type: Number }
+    }],
+    buyConditions: [String],
+    sellConditions: [String],
+  }]
 });
+
 
 module.exports = mongoose.model("user", userSchema);

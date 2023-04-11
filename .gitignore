@@ -142,7 +142,7 @@ dist
 .svelte-kit
 
 # End of https://www.toptal.com/developers/gitignore/api/node
-
+server/mongo-volume/
 server/keys.js
 server/node_modules/
 server/postgres-data/
