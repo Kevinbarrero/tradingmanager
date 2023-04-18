@@ -1,5 +1,3 @@
-const mongoose = require("mongoose");
-
 const userSchema = new mongoose.Schema({
   firstname: { type: String, default: null },
   lastname: { type: String, default: null },
@@ -17,5 +15,19 @@ const userSchema = new mongoose.Schema({
   }]
 });
 
+const defaultStrategy = {
+  name: 'default',
+  indicators: [
+    { id: 'ema', value: 30 },
+    { id: 'ema', value: 90 },
+    { id: 'rsi', value: 6 }
+  ],
+  buyConditions: ['ema30>ema90', 'rsi6>70'],
+  sellConditions: ['ema30<ema90', 'rsi6<30']
+};
+
+userSchema
+  .path('strategies')
+  .default(() => [defaultStrategy]);
 
 module.exports = mongoose.model("user", userSchema);
