@@ -7,7 +7,7 @@ const userSchema = new mongoose.Schema({
   password: { type: String },
   token: { type: String },
   strategies: [{
-    name: { type: String, unique: true },
+    name: { type: String},
     indicators: [{
       id: { type: String },
       value: { type: Number }
