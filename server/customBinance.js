@@ -3,16 +3,15 @@ const {
   isDateInDb,
   getLastRow,
   coinToDb,
+  deleteOldRecords,
 } = require("./dbQueries");
 
 async function getAllCandles(symbol, interval, startTime) {
-    let candles = [];
+  let candles = [];
   try {
-    
     const baseUrl = "https://fapi.binance.com";
     const endpoint = "/fapi/v1/klines";
 
-  
     let limit = 1500;
     let startTimeTemp = startTime;
     let response;
@@ -25,7 +24,7 @@ async function getAllCandles(symbol, interval, startTime) {
           startTime: startTimeTemp,
           limit: limit,
         },
-      })
+      });
       //candles = candles.concat(response.data);
       newCandles = response.data.map((candlestick) => ({
         open_time: candlestick[0],
@@ -38,45 +37,53 @@ async function getAllCandles(symbol, interval, startTime) {
         n_trades: candlestick[8],
       }));
       candles = candles.concat(newCandles);
-      
+
       const lastCandleTimestamp = response.data[response.data.length - 1][0];
       startTimeTemp = lastCandleTimestamp + 1;
     } while (response.data.length === limit);
   } catch (error) {
-    console.log(error)
+    console.log(error);
   }
   return candles;
 }
 
 async function klines1m(coin, startTime) {
-    if ((await isDateInDb(coin, startTime)) === true) {
-      
-      last = await getLastRow(coin);
-      
-      console.log("Data in db");
-      klines = await getAllCandles(
-        coin,
-        "1m",
-        Math.floor(new Date(last.rows[0].open_time).getTime())
-      );
-    } else {
-      console.log("Data Not in DB");
-      klines = await getAllCandles(coin, "1m", startTime);
-    }
-    klines.forEach(async (value) => {
-        await coinToDb(
-        coin.toLowerCase(),
-        value.open_time / 1000,
-        value.open,
-        value.high,
-        value.low,
-        value.close,
-        value.volume,
-        value.close_time / 1000,
-        value.n_trades
-      );
-    })
-  
+  if (await isDateInDb(coin, startTime)) {
+    const last = await getLastRow(coin);
+    console.log("Data in db");
+    const klines = await getAllCandles(
+      coin,
+      "1m",
+      Math.floor(new Date(last.rows[0].open_time).getTime())
+    );
+    const values = klines.map((value) => ({
+      coin: coin.toLowerCase(),
+      open_time: new Date(value.open_time).toISOString(),
+      open: value.open,
+      high: value.high,
+      low: value.low,
+      close: value.close,
+      volume: value.volume,
+      close_time: new Date(value.close_time).toISOString(),
+      n_trades: value.n_trades,
+    }));
+    await coinToDb(coin, values);
+  } else {
+    console.log('Data Not In DB')
+    const klines = await getAllCandles(coin, "1m", startTime);
+    const values = klines.map((value) => ({
+      coin: coin.toLowerCase(),
+      open_time: new Date(value.open_time).toISOString(),
+      open: value.open,
+      high: value.high,
+      low: value.low,
+      close: value.close,
+      volume: value.volume,
+      close_time: new Date(value.close_time).toISOString(),
+      n_trades: value.n_trades,
+    }));
+    await coinToDb(coin, values);
+  }
 }
 
 module.exports = {
