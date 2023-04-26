@@ -66,7 +66,7 @@ app.post("/register", async (req, res) => {
   }
 });
 
-app.post("/saveStrategy", async (req, res) => {
+app.post("/saveStrategy", auth, async (req, res) => {
   console.log(req.headers);
   try {
     const { name, indicators, buyConditions, sellConditions } = req.body;
@@ -111,6 +111,8 @@ app.post("/login", async (req, res) => {
           expiresIn: "2h",
         }
       );
+      user.status = 'online'
+      await user.save();
       user.token = token;
       res.status(200).json(user);
     } else {
@@ -120,7 +122,10 @@ app.post("/login", async (req, res) => {
     console.log(err);
   }
 });
-app.get("/getStrategies", async (req, res) => {
+
+
+app.get("/getStrategies", auth, async (req, res) => {
+
   try {
     const token = req.headers.token;
     const user_id = req.headers._id;
@@ -134,7 +139,7 @@ app.get("/getStrategies", async (req, res) => {
     res.status(500).send("Server error");
   }
 });
-app.post("/deleteStrategy", async (req, res) => {
+app.post("/deleteStrategy", auth, async (req, res) => {
   try {
     const token = req.headers.token;
     const user_id = req.headers._id;
@@ -163,6 +168,55 @@ app.post("/deleteStrategy", async (req, res) => {
     res.status(500).send("Server error");
   }
 });
+app.post("/", async (req, res) => {
+  try {
+    const token = req.headers.token;
+    const user_id = req.headers._id;
+    if (!token && !user_id) {
+      res.status(401).send("Unauthorized");
+    } else {
+      const user = await User.updateOne();
+      res.status(200).json(user.strategies);
+    }
+  } catch (err) {
+    res.status(500).send("Server error");
+  }
+})
+app.post("/updateProfile", async (req, res) => {
+  try {
+    const user = await User.findById(req.headers._id);
+    if (!user) {
+      throw new Error('User not found');
+    }
+    user.firstname = req.body.firstname;
+    user.lastname = req.body.lastname;
+    user.status = req.body.status;
+    //console.log(user)
+    await user.save();
+    res.status(200).send(user);
+  } catch (err) {
+    console.error(err);
+    throw err;
+  }
+})
+app.post('/logout', async (req, res) => {
+  console.log(req.headers);
+  console.log(req.body);
+  await User.findByIdAndUpdate(req.body._id, { status: 'offline' });
+  try {
+    // Clear the JWT token from the user's browser
+    res.clearCookie('token');
+    // Alternatively, clear the JWT token from the user's local storage:
+    // localStorage.removeItem('token');
+
+    // Redirect the user to the login page or any other desired page
+    res.redirect('/login');
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Server Error');
+  }
+});
+
 /*
 app.get('/', (request, response) => {
   response.json({ info: 'Node.js, Express, and Postgres API' })

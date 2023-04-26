@@ -2,8 +2,7 @@ const axios = require("axios");
 const {
   isDateInDb,
   getLastRow,
-  coinToDb,
-  deleteOldRecords,
+  coinToDb
 } = require("./dbQueries");
 
 async function getAllCandles(symbol, interval, startTime) {
@@ -26,7 +25,7 @@ async function getAllCandles(symbol, interval, startTime) {
         },
       });
       //candles = candles.concat(response.data);
-      newCandles = response.data.map((candlestick) => ({
+      let newCandles = response.data.map((candlestick) => ({
         open_time: candlestick[0],
         open: candlestick[1],
         high: candlestick[2],
