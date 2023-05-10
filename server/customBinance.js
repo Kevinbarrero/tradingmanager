@@ -2,7 +2,8 @@ const axios = require("axios");
 const {
   isDateInDb,
   getLastRow,
-  coinToDb
+  coinToDb,
+  findRowsGreaterThanTimestamp,
 } = require("./dbQueries");
 
 async function getAllCandles(symbol, interval, startTime) {
@@ -48,13 +49,19 @@ async function getAllCandles(symbol, interval, startTime) {
 
 async function klines1m(coin, startTime) {
   if (await isDateInDb(coin, startTime)) {
-    const last = await getLastRow(coin);
-    console.log("Data in db");
+    // console.time("dbcandlesreq");
+    let data = await findRowsGreaterThanTimestamp(coin, startTime);
+    const lastRow = data.at(-1);
+    // console.timeEnd("dbcandlesreq");
+
+    // console.time("binancecandlesreq");
     const klines = await getAllCandles(
       coin,
       "1m",
-      Math.floor(new Date(last.rows[0].open_time).getTime())
+      Math.floor(new Date(lastRow.open_time).getTime())
     );
+    // console.timeEnd("binancecandlesreq");
+    // console.time("savecandles");
     const values = klines.map((value) => ({
       coin: coin.toLowerCase(),
       open_time: new Date(value.open_time).toISOString(),
@@ -67,8 +74,12 @@ async function klines1m(coin, startTime) {
       n_trades: value.n_trades,
     }));
     await coinToDb(coin, values);
+    // console.timeEnd("savecandles");
+    data.push(klines);
+    // data.sort((a, b) => a.open_time - b.open_time);
+    return data;
   } else {
-    console.log('Data Not In DB')
+    console.log("Data Not In DB");
     const klines = await getAllCandles(coin, "1m", startTime);
     const values = klines.map((value) => ({
       coin: coin.toLowerCase(),
@@ -82,6 +93,7 @@ async function klines1m(coin, startTime) {
       n_trades: value.n_trades,
     }));
     await coinToDb(coin, values);
+    return klines;
   }
 }
 

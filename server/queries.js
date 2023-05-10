@@ -1,7 +1,7 @@
 const { response } = require("express");
 const Binance = require("node-binance-api");
 const { getAllCandles, klines1m } = require("./customBinance.js");
-const {tableGenerator} = require("./dbQueries");
+const { tableGenerator } = require("./dbQueries");
 
 const { PUBLIC_KEY } = process.env.PUBLIC_KEY;
 const { PRIVATE_KEY } = process.env.PRIVATE_KEY;
@@ -19,21 +19,28 @@ const getKlines = async (request, response) => {
     const interval = request.params.interval;
     const startTime = request.params.startTime;
     console.log(request.params);
-  
+    console.time("getklines");
     if (interval === "1m") {
-      res = await getAllCandles(coin, interval, startTime)
-      klines1m(coin, startTime);
-      response
-        .status(201)
-        .send(res);
+      // res = await getAllCandles(coin, interval, startTime)
+
+      let data = await klines1m(coin, startTime);
+      data.sort(function (a, b) {
+        return new Date(a.open_time) - new Date(b.open_time); // sort by the open_time property
+      });
+      data.pop();
+      data.pop();
+      // console.log("response: ", data);
+      response.status(201).send(data);
     } else {
-      klines = await getAllCandles(coin, interval, startTime);
+      const klines = await getAllCandles(coin, interval, startTime);
       response.status(201).send(klines);
     }
+    console.timeEnd("getklines");
   } catch (error) {
-    response.status(500).send("Internal server error: coin, interval or datatime not correct");
+    response
+      .status(500)
+      .send("Internal server error: coin, interval or datatime not correct");
   }
- 
 };
 
 const createTables = async (request, response) => {
@@ -44,13 +51,13 @@ const createTables = async (request, response) => {
   response.status(201).send("Tables Created Correctly");
 };
 
-const getCoins = async(request, response) => {
+const getCoins = async (request, response) => {
   let coindata = await binance.futuresPrices();
-  response.status(201).send(Object.keys(coindata))
-}
+  response.status(201).send(Object.keys(coindata));
+};
 
 module.exports = {
   createTables,
   getKlines,
-  getCoins
+  getCoins,
 };

@@ -2,9 +2,7 @@ const Pool = require("pg").Pool;
 const POSTGRES_USER = process.env.POSTGRES_USER;
 const DATABASE_NAME = process.env.DATABASE_NAME;
 const DATABASE_PASSWD = process.env.DATABASE_PASSWD;
-var format = require('pg-format');
-const copyFrom = require('pg-copy-streams').from;
-const fs = require('fs');
+const copyFrom = require("pg-copy-streams").from;
 
 const pool = new Pool({
   user: POSTGRES_USER,
@@ -14,53 +12,70 @@ const pool = new Pool({
   port: 5432,
 });
 
-
 async function coinToDb(coin, candles) {
   const tableName = coin.toLowerCase();
   const tempTableName = `${tableName}_temp`;
-  const columns = ['open_time', 'open', 'high', 'low', 'close', 'volume', 'close_time', 'n_trades'];
+  const columns = [
+    "open_time",
+    "open",
+    "high",
+    "low",
+    "close",
+    "volume",
+    "close_time",
+    "n_trades",
+  ];
 
   // Create a new connection from the pool
   const client = await pool.connect();
 
   try {
     // Start a transaction
-    await client.query('BEGIN');
+    await client.query("BEGIN");
 
     // Create a temporary table for the new data
-    await client.query(`CREATE TEMP TABLE ${tempTableName} (LIKE ${tableName} INCLUDING ALL) ON COMMIT DROP`);
+    await client.query(
+      `CREATE TEMP TABLE ${tempTableName} (LIKE ${tableName} INCLUDING ALL) ON COMMIT DROP`
+    );
 
     // Use COPY FROM to insert the new data into the temporary table
-    const stream = client.query(copyFrom(`COPY ${tempTableName} (${columns.join(', ')}) FROM STDIN DELIMITER ',' CSV HEADER`));
-    stream.on('error', (error) => {
+    const stream = client.query(
+      copyFrom(
+        `COPY ${tempTableName} (${columns.join(
+          ", "
+        )}) FROM STDIN DELIMITER ',' CSV HEADER`
+      )
+    );
+    stream.on("error", (error) => {
       throw error;
     });
     candles.forEach((candle) => {
-      stream.write(`${candle.open_time},${candle.open},${candle.high},${candle.low},${candle.close},${candle.volume},${candle.close_time},${candle.n_trades}\n`);
+      stream.write(
+        `${candle.open_time},${candle.open},${candle.high},${candle.low},${candle.close},${candle.volume},${candle.close_time},${candle.n_trades}\n`
+      );
     });
     stream.end();
 
     // Merge the new data with the main table
     await client.query(`
-      INSERT INTO ${tableName} (${columns.join(', ')})
-      SELECT ${columns.join(', ')} FROM ${tempTableName}
+      INSERT INTO ${tableName} (${columns.join(", ")})
+      SELECT ${columns.join(", ")} FROM ${tempTableName}
       ON CONFLICT (open_time) DO UPDATE
       SET (open, high, low, close, volume, close_time, n_trades) =
       (EXCLUDED.open, EXCLUDED.high, EXCLUDED.low, EXCLUDED.close, EXCLUDED.volume, EXCLUDED.close_time, EXCLUDED.n_trades)
     `);
 
     // Commit the transaction
-    await client.query('COMMIT');
+    await client.query("COMMIT");
   } catch (error) {
     // If there is an error, rollback the transaction
-    await client.query('ROLLBACK');
+    await client.query("ROLLBACK");
     throw error;
   } finally {
     // Release the client back to the pool
     client.release();
   }
 }
-
 
 function tableGenerator(key) {
   const query =
@@ -103,11 +118,16 @@ async function isDateInDb(coin, startTime) {
 
 async function findRowsGreaterThanTimestamp(coin, startTime) {
   const query = {
-    text: `SELECT * FROM ${coin} WHERE open_time > ${new Date(startTime)}`,
+    text: `SELECT * FROM ${coin} WHERE open_time >= to_timestamp($1) + interval '3 hours'`,
+    values: [startTime / 1000],
   };
 
   const result = await pool.query(query);
-  console.log("getdatafromdb: ", result);
+  // return result.rows.sort((a, b) => a.open_time - b.open_time);
+  // console.log(
+  // "db response: ",
+  // result.rows.sort((a, b) => a.open_time - b.open_time).at(-1)
+  // );
   return result.rows.sort((a, b) => a.open_time - b.open_time);
 }
 
