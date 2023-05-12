@@ -28,7 +28,6 @@ const getKlines = async (request, response) => {
         return new Date(a.open_time) - new Date(b.open_time); // sort by the open_time property
       });
       data.pop();
-      data.pop();
       // console.log("response: ", data);
       response.status(201).send(data);
     } else {
